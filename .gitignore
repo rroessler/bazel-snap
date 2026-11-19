@@ -1,0 +1,8 @@
+# Snapcraft Outputs
+/parts/
+/stage/
+/prime/
+*.snap
+
+# Spread Integration
+.spread-reuse.*.yaml

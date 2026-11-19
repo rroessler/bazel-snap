@@ -1,0 +1,5 @@
+summary: Check 'bazel' binary is installed
+
+execute: |
+  set -ex
+  bazel --version

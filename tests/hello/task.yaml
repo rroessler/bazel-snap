@@ -1,0 +1,12 @@
+summary: Build a C++ project with 'bazel' binary
+
+prepare: |
+  apt-get update && apt-get install -y build-essential
+
+execute: |
+  set -ex
+  bazel build //main:hello
+  bazel-bin/main/hello | grep "Hello, Bazel!"
+
+restore: |
+  apt-get purge -y build-essential

@@ -1,0 +1,62 @@
+name: bazel
+title: Bazel
+version: 7.7.2
+license: Apache-2.0
+summary: A fast, scalable, multi-language and extensible build system
+description: |
+  Bazel builds and tests software. This snap provides all Bazel series,
+  built from the source distribution on all available architectures.
+
+  The snap is classic, so builds use the compilers and tools of the host.
+  Install a C++ compiler (for example build-essential) and zip and unzip
+  on the host.
+
+base: core26
+grade: stable
+confinement: classic
+
+platforms:
+  amd64:
+  arm64:
+  armhf:
+  ppc64el:
+  riscv64:
+  s390x:
+
+apps:
+  bazel:
+    command: bin/bazel
+    environment:
+      JAVA_HOME: "$SNAP/usr/lib/jvm/java-21-openjdk-$SNAP_ARCH"
+      PATH: $JAVA_HOME/bin:$PATH
+
+parts:
+  bazel:
+    plugin: nil
+    build-packages:
+      - zip
+      - curl
+      - gnupg
+      - patch
+      - unzip
+      - python3
+      - build-essential
+      - openjdk-21-jdk-headless
+    stage-packages:
+      - openjdk-21-jdk-headless
+    override-build: |
+      # prepare the environment in which we will bootstrap with
+      export SOURCE_WORKDIR="bazel-dist"
+      export SOURCE_VERSION=$(craftctl get version)
+      export SOURCE_PLATFORM="$CRAFT_ARCH_BUILD_FOR"
+      export SOURCE_KEYRING="$CRAFT_PROJECT_DIR/snap/keyring.gpg"
+      export SOURCE_PATCHES="$CRAFT_PROJECT_DIR/patches/${SOURCE_VERSION%%.*}"
+
+      # force the usage of "openjdk-21-jdk" for our Java installation
+      export JAVA_HOME="/usr/lib/jvm/java-21-openjdk-$SOURCE_PLATFORM"
+
+      # attempt bootstrapping with our desired environment
+      bash "$CRAFT_PROJECT_DIR/scripts/bootstrap.sh"
+
+      # make sure to install Bazel to be staged
+      install -D "$SOURCE_WORKDIR/output/bazel" "$CRAFT_PART_INSTALL/bin/bazel"
